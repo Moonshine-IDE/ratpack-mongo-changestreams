@@ -1,0 +1,36 @@
+.gradle
+**/build/
+!src/**/build/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+.DS_Store
+.classpath
+.settings
+.project
+build/
+bin/
+out/
+*.iml
+*.ipr
+*.iws
+.factorypath
+pom.xml
+target/
+db/
+starth2
+.gradletasknamecache
+.sass-cache/
+.jruby/
+ratpack-groovy/Expression$*.class
+/.java-version
+Expression$*.class
+ratpack-version.txt
+deploy
+.jruby-container
+.idea
+

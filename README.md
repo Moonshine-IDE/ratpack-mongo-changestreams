@@ -81,7 +81,16 @@ To update a single document:
 `db.restaurants.updateOne( { name: "XYZ Coffee Bar" }, { $set: { "stars": 5 } })`
 
 To update multiple documents:  
-`db.restaurants.updateMany( { stars: 4 }, { $set: { "stars": 5 } }`
+```
+try {
+   db.restaurants.updateMany(
+      { stars: { $eq: 4 } },
+      { $set: { "stars" : 1 } }
+   );
+} catch (e) {
+   print(e);
+}
+```
 
 ### References
 - https://www.mongodb.com/blog/post/an-introduction-to-change-streams

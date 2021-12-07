@@ -2,82 +2,155 @@
 <html>
 <head>
     <title>SSE Demo</title>
-    <style>
-        table, th, td {
-          border: 1px solid black;
-          border-collapse: collapse;
-        }
-        th, td {
-          padding: 8px;
-        }
-</style>
-
-    <script>
-        if(typeof(EventSource) !== "undefined") {
-            var source = new EventSource("dataGrid");
-            source.onmessage = function(event) {
-                console.log("success", event.data);
-
-                // We could send the data required to updated within the Server-sent event data
-                // and avoid the additional ajax request to reload the table, but that is out of
-                // the scope of this demo
-                reloadTable();
-            };
-            source.addEventListener('error', function(e) {
-                console.log("error: ", e);
-                if (e.readyState == EventSource.CLOSED) {
-                    console.log("error: Connection was closed.");
-                }
-            }, false);
-        } else {
-            document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
-        }
-
-        function setTableData(tableData){
-            var people = JSON.parse(tableData);
-
-            var length = people.length,
-                element = null;
-            var table = document.getElementById("peopleTable");
-            table.innerHTML = "<tr style='background-color: black; color: white;'><td>Restaurant</td><td>Stars</td><td>Contact</td><td>Email</td></tr>";
-
-            for (var i = 0; i < length; i++) {
-                element = people[i];
-                var row = table.insertRow(i + 1);
-                var cell1  = row.insertCell(0);
-                cell1.innerText = element.name;
-
-                var cell2  = row.insertCell(1);
-                cell2.innerText = element.stars;
-
-                var cell3  = row.insertCell(2);
-                cell3.innerText = element.contact.phone;
-
-                var cell4  = row.insertCell(3);
-                cell4.innerText = element.contact.email;
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.3/css/dx.common.css">
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.3/css/dx.light.css">
 </head>
-
 <body>
 <h1>Data source</h1>
 <p>The data is being streamed back to the browser using Server-Sent Events.</p>
 <br />
-<table id="peopleTable" style="border: 1px solid">
-</table>
 
+<div class="dx-viewport demo-container">
+  <div id="grid-container">
+    <h2>Please wait, the dataset is being initialized...</h2>
+  </div>
+</div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn3.devexpress.com/jslib/21.2.3/js/dx.all.js"></script>
 <script>
-    function reloadTable() {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onload = function() {
-            setTableData(this.responseText);
-        };
-        xhttp.open("GET", "jsonData");
-        xhttp.send();
-    }
-    reloadTable();
+
+var products = [];
+var productsStore = [];
+
+function initializeStream(){
+  if(typeof(EventSource) !== "undefined") {
+    var source = new EventSource("dataGrid");
+    source.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+
+      var operationType = data.operationType.toLowerCase();
+      var gradeData;
+      var gradeKey = data.documentKey.hexaId.value;
+
+      switch(data.operationType) {
+        case "UPDATE":
+          gradeData = getGradeDataFromUpdatedFields(data);
+          break;
+        case "INSERT":
+          gradeData = getGradeDataFromDocument(data);
+          break;
+        case "DELETE":
+          operationType = "remove";
+          break;
+        case "REPLACE":
+          operationType = "update";
+          gradeData = getGradeDataFromDocument(data);
+          break;
+      }
+
+      productsStore.push([{
+        type: operationType, // datagrid supports insert, update or remove
+        key: gradeKey,
+        data: gradeData,
+      }]);
+    };
+    source.addEventListener('error', function(e) {
+      console.log("error: ", e);
+      if (e.readyState == EventSource.CLOSED) {
+        console.log("error: Connection was closed.");
+      }
+    }, false);
+  } else {
+      document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
+  }
+}
+
+$.getJSON( "jsonData", function( data ) {
+    $.each(data, function(i){
+      products.push({
+        id: this.hexaId, studentName: this.studentName, classId: this.classId, studentId: this.studentId, examScore: this.examScore, quizScore: this.quizScore, homeworkScore: this.homeworkScore,
+      });
+    });
+
+    productsStore = new DevExpress.data.ArrayStore({
+      key: 'id',
+      data: products
+    });
+
+    $('#grid-container').dxDataGrid({
+      dataSource: {
+        store: productsStore,
+        reshapeOnPush: true,
+      },
+      repaintChangesOnly: true,
+      highlightChanges: true,
+      columnAutoWidth: true,
+      showBorders: true,
+      paging: {
+        pageSize: 10,
+      },
+      columns: [
+        { dataField: 'studentName', dataType: 'string' },
+        { dataField: 'studentId', dataType: 'number' },
+        { dataField: 'classId', dataType: 'number' },
+        {
+          dataField: 'examScore', dataType: 'number', allowSorting: true,
+        },
+        { dataField: 'quizScore', dataType: 'number' },
+        { dataField: 'homeworkScore', dataType: 'number' },
+      ],
+      summary: {
+        totalItems: [{
+          summaryType: 'count',
+          column: 'studentName',
+        }, {
+          summaryType: 'avg',
+          displayFormat: '{0}',
+          column: 'quizScore',
+        }, {
+          summaryType: 'avg',
+          displayFormat: '{0}',
+          column: 'examScore',
+        }, {
+          summaryType: 'avg',
+          displayFormat: '{0}',
+          column: 'homeworkScore',
+        }],
+      },
+      onRowUpdated(e) {
+        console.log(e);
+        logEvent('RowUpdated');
+      }
+    });
+
+    initializeStream();
+});
+
+function getGradeDataFromDocument(data){
+  return {
+    id: data.fullDocument.hexaId,
+    studentName: data.fullDocument.studentName,
+    classId: data.fullDocument.classId,
+    studentId: data.fullDocument.studentId,
+    examScore: data.fullDocument.examScore,
+    quizScore: data.fullDocument.quizScore,
+    homeworkScore: data.fullDocument.homeworkScore,
+  };
+}
+
+function getGradeDataFromUpdatedFields(data){
+  var obj = data.updateDescription.updatedFields;
+  var keys = Object.keys(obj);
+  var updatedGradeFields = {};
+
+  for (var i = 0; i < keys.length; i++) {
+    updatedGradeFields[keys[i]] = obj[keys[i]].value;
+  }
+
+  return updatedGradeFields;
+}
+
 </script>
 </body>
 

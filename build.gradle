@@ -29,4 +29,5 @@ mainClassName = 'RatpackPush'
 
 tasks.withType(JavaExec) {
   // systemProperty "rToken", "8261AFB28E000000042B022C0100296E5A10049EEAB2AB2BF549A6B58567DA103BBF1246645F6964006456D5F7EB604EB380B0D8DA8A0004"
+  systemProperty "mongo.uri", "mongodb://192.168.1.90:27017"
 }

@@ -23,8 +23,7 @@ public class RatpackPush {
 
   public static void main(String[] args) throws Exception {
 
-    MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-
+    MongoClient mongoClient = MongoClients.create(System.getProperty("mongo.uri"));
 
     MongoDatabase database = mongoClient.getDatabase("test");
     MongoCollection<Document> collection = database.getCollection("grades");
@@ -47,7 +46,7 @@ public class RatpackPush {
       .handlers(chain -> chain
         .files(f -> f.dir("public").indexFiles("index.html"))
         .get("jsonData", ctx -> {
-          ctx.render(chunkedJsonList(ctx, collection.find(lte("classId", 20d))));
+          ctx.render(chunkedJsonList(ctx, collection.find(lte("classId", 100d))));
         })
         .get("dataGrid", ctx -> {
             ServerSentEvents events = ServerSentEvents.serverSentEvents(changes, dataGridEvent -> {

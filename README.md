@@ -13,7 +13,7 @@ Basic HTTP reactive application that uses Ratpack, MongoStreams and Server-sent 
 - Open the file `Vagrantfile` and edit the `GUEST_IP` value, use an available local network IP, this is the IP address that will be asigned to the virtual machine.
 - Open the file `build.gradle` and edit the `mongo.uri` variable with the local IP address used in the previous step.
 - Execute the `vagrant up` command, once the process completes an Ubuntu-MongoDB virtual machine will be running.
-- [Continue to step 2](#run-the-project).
+- [Continue to step 2](#2-run-the-project).
 
 ## Option 2: Mongo DB local installation
 ### Install MongoDB
@@ -59,7 +59,7 @@ mongod --replSet rs0 --dbpath /mongodb/data
 Import the [restaurants](https://raw.githubusercontent.com/mongodb/docs-assets/drivers/restaurants.json) collection into the test database as shown in this readme file:
 https://github.com/mongodb/docs-assets/tree/drivers
 
-# Run the project
+# 2. Run the project
 Once the mongodb server is running you can continue and run this project
 ## Using the Gradle wrapper
 ### Ubuntu  
@@ -74,7 +74,7 @@ Open the project in Moonshine with File > Open/Import Project or by double-click
 Project > Run Gradle Command. This will run the default command gradle clean runApp.
 
 
-# Update the collection using mongosh
+# 3. Update the collection using mongosh
 Any modification/insertion into the restaurants collection will trigger a server-sent event in the Ratpack application. 
 
 Connect to mongosh \

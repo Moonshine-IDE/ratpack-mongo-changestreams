@@ -82,14 +82,19 @@ Connect to mongosh \
 
 Then within mongosh
 To update a single document:  
-`db.restaurants.updateOne( { name: "XYZ Coffee Bar" }, { $set: { "stars": 5 } })`
+```
+db.grades.updateOne( 
+   { quizScore: { $gte: 90 } }, 
+   [{ $set: { examScore: { $round: [ { $multiply: [ { $rand: {} }, 100 ] }, 2 ] } } }]
+);
+```
 
 To update multiple documents:  
 ```
 try {
-   db.restaurants.updateMany(
-      { stars: { $eq: 4 } },
-      { $set: { "stars" : 1 } }
+   db.grades.updateMany(
+      { examScore: { $lte: 25 } },
+      [{ $set: { examScore: { $round: [ { $multiply: [ { $rand: {} }, 100 ] }, 2 ] } } }],
    );
 } catch (e) {
    print(e);

@@ -1,26 +1,27 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-GUEST_IP="192.168.1.90"
+# The ports on the host that you want to use to access the port on the guest.
+# This must be greater than port 1024.
+MONGODB_PORT=27017
+HTTP_SERVER_PORT=8080
+
 Vagrant.configure(2) do |config|
 
   config.vm.box = "ubuntu/bionic64"
 
-  #config.disksize.size = '50GB'
-  #config.vm.synced_folder "~/Projects/Prominic", "/home/vagrant/projects"
-
   config.vm.provider "virtualbox" do |vb|
      vb.name = "mongo_vm"
-     vb.memory = "2048"
+     vb.memory = "1024"
    end
 
-  # Setting up public network interface
-  config.vm.network "public_network", ip: GUEST_IP, auto_config: true,
-    :mac => "525400c042d9",
-    :netmask => "255.255.255.0"
+  config.vm.network "forwarded_port", guest: 8080, host: HTTP_SERVER_PORT, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 27017, host: MONGODB_PORT, host_ip: "127.0.0.1"
 
   config.vm.provision "shell", path: "vagrant/provision.sh", privileged: false
 
-  config.vm.provision "shell", path: "vagrant/initReplica.sh", privileged: false, args: [GUEST_IP]
+  config.vm.provision "shell", path: "vagrant/initReplica.sh", privileged: false
+
+  config.vm.provision "shell", inline: "echo Back-end server configuration complete!"
 
 end

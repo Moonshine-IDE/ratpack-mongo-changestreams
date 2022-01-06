@@ -4,14 +4,6 @@ VAGRANT_DIR=/vagrant/vagrant
 HOME_DIR=~/
 HOME_BIN_DIR=$HOME_DIR/bin
 
-download()
-{
-    local url=$2
-    local file=$1
-    echo "Downloading $file"
-    wget --progress=dot $url >/dev/null 2>&1
-}
-
 installPackage()
 {
     local packages=$*

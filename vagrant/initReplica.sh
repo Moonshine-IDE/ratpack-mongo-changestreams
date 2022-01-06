@@ -10,8 +10,6 @@ sudo chown mongodb:mongodb -R /mongodb/
 
 sudo mv /etc/mongod.conf /etc/mongod.conf.bk
 sudo cp $VAGRANT_DIR/mongod.conf /etc/mongod.conf
-sudo cp $VAGRANT_DIR/hosts /etc/hosts
-sudo sed -i "s/GUEST_IP/$1/g" /etc/hosts
 
 sudo systemctl enable mongod.service
 sudo systemctl start mongod

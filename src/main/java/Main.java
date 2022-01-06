@@ -25,10 +25,10 @@ public class Main {
       RatpackServer.start(server -> server
         .serverConfig(c -> c.baseDir(BaseDir.find()))
         .handlers(chain -> chain
-          .files(f -> f.dir("public").indexFiles("index.html"))
+          .files(f -> f.path("frontend").dir("public").indexFiles("index.html"))
           .path("api/grades", routerHandler)
           .path("api/grades/:id", routerHandler)
-          .get("dataGrid", new MongoChangeStreamHandler(collection))
+          .get("grades/stream", new MongoChangeStreamHandler(collection))
         )
       );
     } catch (Exception e) {

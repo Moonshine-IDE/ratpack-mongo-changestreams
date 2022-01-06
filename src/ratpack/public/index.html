@@ -27,7 +27,7 @@ var REST_API = '/api/grades';
 
 function initializeStream(){
   if(typeof(EventSource) !== "undefined") {
-    var source = new EventSource("dataGrid");
+    var source = new EventSource("/grades/stream");
     source.onmessage = function(event) {
       const data = JSON.parse(event.data);
 

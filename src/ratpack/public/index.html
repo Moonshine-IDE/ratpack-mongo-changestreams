@@ -22,6 +22,8 @@
 
 var grades = [];
 var gradesStore = [];
+var isDataLoaded = false;
+var REST_API = '/api/grades';
 
 function initializeStream(){
   if(typeof(EventSource) !== "undefined") {
@@ -66,16 +68,105 @@ function initializeStream(){
   }
 }
 
-$.getJSON( "jsonData", function( data ) {
-    $.each(data, function(i){
-      grades.push({
-        id: this.hexaId, studentName: "Student " + this.studentId, classId: this.classId, studentId: this.studentId, examScore: this.examScore, quizScore: this.quizScore, homeworkScore: this.homeworkScore,
-      });
-    });
+$(function() {
+    gradesStore = new DevExpress.data.CustomStore({
+      key: "hexaId",
+      load: function(options) {
+        // https://js.devexpress.com/Documentation/ApiReference/Data_Layer/CustomStore/Configuration/#load
+        // from https://www.devexpress.com/Support/Center/Question/Details/KA18955
+        var params = {};
 
-    gradesStore = new DevExpress.data.ArrayStore({
-      key: 'id',
-      data: grades
+        if (options.filter) params.filter = JSON.stringify(options.filter);
+        if (options.sort) params.sort = JSON.stringify(options.sort);
+
+        // This generation of the app, we don't distinguish between data grid
+        // and pivot grid data sources, so I'll just set this parameter
+        // globally even though it's really only required for the pivot grid.
+        // Since the query limit feature is mainly a protection against crazy
+        // queries running because of misconfigured grids, this shouldn't be
+        // a problem.
+        // The value is arbitrary. If you anticipate seeing pivot grid setups
+        // with even more summary values per page, increase it or even set to
+        // zero to deactivate the limit.
+        params.summaryQueryLimit = 500;
+
+        params.skip = options.skip;
+        params.take = options.take;
+        params.requireTotalCount = options.requireTotalCount;
+
+        if (options.totalSummary)
+          params.totalSummary = JSON.stringify(options.totalSummary);
+
+        // Oliver: this is the projection - outstanding question - do our controls use this?
+        // I haven't seen it so far...
+        if (options.select) params.select = JSON.stringify(options.select);
+
+        // If a user typed something in dxAutocomplete, dxSelectBox or dxLookup (original comment)
+        // The dxDataGrid doesn't use this parameter, it uses "filter" instead...
+        // actually, these options reflect the functionality of "filter" exactly, with the one
+        // exception that searchExpr can be an array of field names, or just one.
+        // I decided to transfer the parameters to the server anyway - could transpose them right here.
+        if (options.searchValue) {
+          params.searchValue = options.searchValue;
+          params.searchOperation = options.searchOperation;
+          params.searchExpr = options.searchExpr;
+        }
+
+        if (options.group) {
+          params.group = JSON.stringify(options.group);
+          params.requireGroupCount = options.requireGroupCount;
+          if (options.groupSummary)
+            params.groupSummary = JSON.stringify(options.groupSummary);
+        }
+
+        params.tzOffset = new Date().getTimezoneOffset();
+
+        var d = $.Deferred();
+        console.log('Load options :', params);
+
+        $.getJSON(REST_API, params).done(function(res) {
+          //console.log("Static load result: " + JSON.stringify(res));
+
+          var details = {};
+          if (options.requireTotalCount) details.totalCount = res.totalCount;
+          if (options.requireGroupCount) details.groupCount = res.groupCount;
+          if (options.totalSummary) details.summary = res.summary;
+
+          // @TODO: initializeStream() should be called once, after the data is loaded.
+          if(isDataLoaded == false){
+            initializeStream();
+          }
+          isDataLoaded = true;
+          d.resolve(res.data, details);
+        });
+        return d.promise();
+      },
+      byKey: function(key) {
+        return $.getJSON(REST_API + '/' + encodeURIComponent(key));
+      },
+      insert: function(value) {
+        return $.ajax({
+          url: REST_API,
+          method: 'POST',
+          data: JSON.stringify(value),
+          contentType: 'application/json'
+        });
+      },
+      update: function(key, value) {
+        return $.ajax({
+          url: REST_API + '/' + encodeURIComponent(key),
+          method: 'PUT',
+          data: JSON.stringify(value),
+          contentType: 'application/json'
+        });
+      },
+      remove: function(key) {
+        return $.ajax({
+          url: REST_API + '/' + encodeURIComponent(key),
+          method: 'DELETE',
+          contentType: 'application/json'
+        });
+      }
     });
 
     $('#grid-container').dxDataGrid({
@@ -90,8 +181,43 @@ $.getJSON( "jsonData", function( data ) {
       paging: {
         pageSize: 10
       },
+      remoteOperations: {
+        filtering: true,
+        // grouping: true,
+        // groupPaging: true,
+        grouping: false,
+        groupPaging: false,
+        paging: true,
+        sorting: true,
+        summary: true
+      },
+      editing: {
+        mode: 'batch',
+        allowAdding: true,
+        allowDeleting: true,
+        allowUpdating: true
+      },
+      filterRow: {
+        visible: true
+      },
+      headerFilter: {
+        visible: true
+      },
+      // groupPanel: {
+      //   visible: true
+      // },
+      grouping: {
+        autoExpandAll: false
+      },
+      groupPanel: {
+        visible: false
+      },
+      searchPanel: {
+        visible: true,
+        highlightCaseSensitive: true,
+      },
       columns: [
-        { dataField: 'studentName', dataType: 'string' },
+        { dataField: 'hexaId', dataType: 'string' },
         { dataField: 'studentId', dataType: 'number' },
         { dataField: 'classId', dataType: 'number' },
         {
@@ -103,7 +229,7 @@ $.getJSON( "jsonData", function( data ) {
       summary: {
         totalItems: [{
           summaryType: 'count',
-          column: 'studentName',
+          column: 'hexaId',
         }, {
           summaryType: 'avg',
           displayFormat: '{0}',
@@ -122,11 +248,16 @@ $.getJSON( "jsonData", function( data ) {
 
     initializeStream();
 });
+// });
+
+function isNotEmpty(value) {
+    return value !== undefined && value !== null && value !== "";
+}
 
 function getGradeDataFromDocument(data){
   return {
     id: data.fullDocument.hexaId,
-    studentName: "Student " + data.fullDocument.studentId,
+    hexaId: data.fullDocument.hexaId,
     classId: data.fullDocument.classId,
     studentId: data.fullDocument.studentId,
     examScore: data.fullDocument.examScore,

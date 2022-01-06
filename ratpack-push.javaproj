@@ -7,7 +7,7 @@
     <class path="src/main/java"/>
   </classpaths>
   <build>
-    <option mainclass="RatpackPush"/>
+    <option mainclass="Main"/>
   </build>
   <options>
   </options>

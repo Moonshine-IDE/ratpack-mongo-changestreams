@@ -1,18 +1,14 @@
 # ratpack-mongo-changestreams basic demo app
-Basic HTTP reactive application that uses Ratpack, MongoStreams and Server-sent events to send notifications to the front-end when a Document is updated in the MongoDB Collection.  
+Basic HTTP reactive application that uses Ratpack, MongoStreams and Server-sent events to send notifications to the front-end when a Document is updated in the MongoDB Collection.
 
-We use a DevExtreme DataGrid component to provide a simple HTMl page to show and edit the data, this DataGrid uses a custom DataSource that fetches data from a Back-end 
-endpoint that implements the required logic to query data from a MongoDB collection, parametrized by a DevExtreme [loadOptions](https://js.devexpress.com/Documentation/ApiReference/Data_Layer/CustomStore/LoadOptions/) object.  
+We use a DevExtreme DataGrid component to provide a simple HTMl page to show and edit the data, this DataGrid uses a custom DataSource that fetches data from a Back-end
+endpoint that implements the required logic to query data from a MongoDB collection, parametrized by a DevExtreme [loadOptions](https://js.devexpress.com/Documentation/ApiReference/Data_Layer/CustomStore/LoadOptions/) object.
 
-# Requirements and Setup
-## Requirements
-
-#### Required Dependencies: 
+# Requirements
 - MongoDB  
 - Java 8+  
+- [Optional] Moonshine-IDE
 
-#### Optional: 
-- Moonshine-IDE
 
 # 1. Database server setup
 ## Option 1: VirtualBox Vagrant setup
@@ -25,7 +21,7 @@ endpoint that implements the required logic to query data from a MongoDB collect
 ## Option 2: Mongo DB local installation
 <details>
 <summary>Click to expand!</summary>
-  
+
 ### Install MongoDB
 #### Ubuntu
 https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/.
@@ -66,7 +62,7 @@ mongod --replSet rs0 --dbpath /mongodb/data
 `rs.initiate()`
 
 ## Import test collection
-Import the grades collection from the file `vagrant/grades.json` into the test database like this:  
+Import the grades collection from the file `vagrant/grades.json` into the test database like this:
 
 `mongoimport --db test --collection grades --drop --file grades.json`
 </details>
@@ -78,10 +74,10 @@ Once the mongodb server is running you can continue and run this project
 #### Ubuntu  
 `./gradlew run`
 
-#### Windows  
+### Windows
 `gradlew.bat run`
 
-### From Moonshine IDE
+## From Moonshine IDE
 
 Open the project in Moonshine with `File > Open/Import Project` or by double-clicking on ratpack-push.javaproj.
 `Project > Run Gradle Command`. This will run the default command gradle clean runApp.
@@ -95,17 +91,18 @@ Open the project in Moonshine with `File > Open/Import Project` or by double-cli
 3. **GET /grades/stream**: This endpoint uses mongo Change Streams to respond with a Server-sent event when any operation (insert, update, delete) is performed on the Grades collection (similar to what we have in the Ratpack back-end demo app).
 
 4. **GET /frontend**: This is an endpoint for testing the back-end endpoints. It responds with an HTML page that displays a list of Grades and dynamically updates the table when a notification (Server-sent event) is received.
-  
+
 # 3. Update the collection using mongosh
+Any modification/insertion into the restaurants collection will trigger a server-sent event in the Ratpack application. 
 
 Connect to mongosh \
-`mongosh mongodb://localhost:27017/test`
+`mongosh mongodb://<MONGODB_SERVER_IP>:27017/test`
 
 Then within mongosh
 To update a single document:  
 ```
-db.grades.updateOne( 
-   { quizScore: { $gte: 90 } }, 
+db.grades.updateOne(
+   { quizScore: { $gte: 90 } },
    [{ $set: { examScore: { $round: [ { $multiply: [ { $rand: {} }, 100 ] }, 2 ] } } }]
 );
 ```
@@ -122,5 +119,5 @@ try {
 }
 ```
 
-### References
+# References
 - https://www.mongodb.com/blog/post/an-introduction-to-change-streams

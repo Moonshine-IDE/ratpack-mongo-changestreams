@@ -74,10 +74,10 @@ Once the mongodb server is running you can continue and run this project
 #### Ubuntu  
 `./gradlew run`
 
-### Windows
+#### Windows
 `gradlew.bat run`
 
-## From Moonshine IDE
+### From Moonshine IDE
 
 Open the project in Moonshine with `File > Open/Import Project` or by double-clicking on ratpack-push.javaproj.
 `Project > Run Gradle Command`. This will run the default command gradle clean runApp.
@@ -119,5 +119,5 @@ try {
 }
 ```
 
-# References
+#### References
 - https://www.mongodb.com/blog/post/an-introduction-to-change-streams

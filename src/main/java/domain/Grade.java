@@ -1,70 +1,70 @@
 package domain;
 
 public class Grade {
-	private String _id;
-	private String hexaId;
-	private Double examScore;
-	private Double homeworkScore;
-	private Double quizScore;
-	private Integer classId;
-	private Integer studentId;
+  private String _id;
+  private String hexaId;
+  private Double examScore;
+  private Double homeworkScore;
+  private Double quizScore;
+  private Integer classId;
+  private Integer studentId;
 
-	public Grade() {
-	}
+  public Grade() {
+  }
 
-	public String getId() {
-		return _id;
-	}
+  public String getId() {
+    return _id;
+  }
 
-	public String getHexaId() {
-		return hexaId;
-	}
+  public String getHexaId() {
+    return hexaId;
+  }
 
-	public Double getExamScore() {
-		return examScore;
-	}
+  public Double getExamScore() {
+    return examScore;
+  }
 
-	public Double getHomeworkScore() {
-		return homeworkScore;
-	}
+  public Double getHomeworkScore() {
+    return homeworkScore;
+  }
 
-	public Double getQuizScore() {
-		return quizScore;
-	}
+  public Double getQuizScore() {
+    return quizScore;
+  }
 
-	public Integer getClassId() {
-		return classId;
-	}
+  public Integer getClassId() {
+    return classId;
+  }
 
-	public Integer getStudentId() {
-		return studentId;
-	}
+  public Integer getStudentId() {
+    return studentId;
+  }
 
-	public void setId(String _id) {
-		this._id = _id;
-	}
+  public void setId(String _id) {
+    this._id = _id;
+  }
 
-	public void setHexaId(String hexaId) {
-		this.hexaId = hexaId;
-	}
+  public void setHexaId(String hexaId) {
+    this.hexaId = hexaId;
+  }
 
-	public void setExamScore(Double examScore) {
-		this.examScore = examScore;
-	}
+  public void setExamScore(Double examScore) {
+    this.examScore = examScore;
+  }
 
-	public void setHomeworkScore(Double homeworkScore) {
-		this.homeworkScore = homeworkScore;
-	}
+  public void setHomeworkScore(Double homeworkScore) {
+    this.homeworkScore = homeworkScore;
+  }
 
-	public void setQuizScore(Double quizScore) {
-		this.quizScore = quizScore;
-	}
+  public void setQuizScore(Double quizScore) {
+    this.quizScore = quizScore;
+  }
 
-	public void setClassId(Integer classId) {
-		this.classId = classId;
-	}
+  public void setClassId(Integer classId) {
+    this.classId = classId;
+  }
 
-	public void setStudentId(Integer studentId) {
-		this.studentId = studentId;
-	}
+  public void setStudentId(Integer studentId) {
+    this.studentId = studentId;
+  }
 }

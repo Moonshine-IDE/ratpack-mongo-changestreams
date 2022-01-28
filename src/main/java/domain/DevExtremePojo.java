@@ -1,12 +1,13 @@
 package domain;
 
 import java.util.List;
+
 import org.bson.Document;
 
 public class DevExtremePojo {
   private List<Document> data;
   private Integer totalCount;
-  private List<Integer> summary;
+  private List<Double> summary;
 
   public DevExtremePojo() {
   }
@@ -27,11 +28,11 @@ public class DevExtremePojo {
     this.totalCount = totalCount;
   }
 
-  public List<Integer> getSummary() {
+  public List<Double> getSummary() {
     return summary;
   }
 
-  public void setSummary(List<Integer> summary) {
+  public void setSummary(List<Double> summary) {
     this.summary = summary;
   }
 }

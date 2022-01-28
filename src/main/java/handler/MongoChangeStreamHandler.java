@@ -1,11 +1,9 @@
 package handler;
 
 import com.mongodb.client.model.Aggregates;
-import com.mongodb.reactivestreams.client.MongoCollection;
-import com.mongodb.reactivestreams.client.ChangeStreamPublisher;
 import com.mongodb.client.model.Filters;
-import java.util.Arrays;
-import java.util.List;
+import com.mongodb.reactivestreams.client.ChangeStreamPublisher;
+import com.mongodb.reactivestreams.client.MongoCollection;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.Document;
@@ -13,6 +11,9 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 import ratpack.jackson.Jackson;
 import ratpack.sse.ServerSentEvents;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MongoChangeStreamHandler implements Handler {
 

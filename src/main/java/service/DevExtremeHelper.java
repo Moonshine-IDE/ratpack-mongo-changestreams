@@ -1,14 +1,16 @@
 package service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import ratpack.util.MultiValueMap;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.ascending;
 import static com.mongodb.client.model.Sorts.descending;
@@ -23,7 +25,7 @@ public class DevExtremeHelper {
   public static int getSkip(MultiValueMap<String, String> requestParams) {
     int skip = 0;
 
-    if(requestParams.get("skip") != null) {
+    if (requestParams.get("skip") != null) {
       skip = Integer.valueOf(requestParams.get("skip"));
     }
     return skip;
@@ -32,7 +34,7 @@ public class DevExtremeHelper {
   public static int getTake(MultiValueMap<String, String> requestParams) {
     int take = 10;
 
-    if(requestParams.get("take") != null) {
+    if (requestParams.get("take") != null) {
       take = Integer.valueOf(requestParams.get("take"));
     }
 
@@ -44,7 +46,7 @@ public class DevExtremeHelper {
 
     String sortInstruction = requestParams.get("sort");
 
-    if(sortInstruction == null || sortInstruction.isEmpty()){
+    if (sortInstruction == null || sortInstruction.isEmpty()) {
       return sortResult;
     }
 
@@ -63,10 +65,9 @@ public class DevExtremeHelper {
     return sortResult;
   }
 
-  public static List<Object> convertFiltersToBson(
-    JsonNode jsonNode, List<Object> processedList) {
+  public static List<Object> convertFiltersToBson(JsonNode jsonNode, List<Object> processedList) {
 
-    if(jsonNode == null || jsonNode.isNull()){
+    if (jsonNode == null || jsonNode.isNull()) {
       return processedList;
     }
 
@@ -74,21 +75,21 @@ public class DevExtremeHelper {
       // Last level array node
       if (jsonNode.size() == 3) {
         Bson filter = DevExtremeHelper.getDocument(jsonNode);
-        if(filter != null){
+        if (filter != null) {
           processedList.add(filter);
         }
       } else {
         // Throw exception, filter not supported!
       }
 
-    } else if(jsonNode.isArray() && jsonNode.get(0).isArray()) {
+    } else if (jsonNode.isArray() && jsonNode.get(0).isArray()) {
       // Grouping level
       List innerList = new ArrayList<Object>();
       for (final JsonNode objNode : jsonNode) {
         DevExtremeHelper.convertFiltersToBson(objNode, innerList);
       }
       processedList.add(innerList);
-    } else if(!jsonNode.isArray()) {
+    } else if (!jsonNode.isArray()) {
       // Logical connector (or, and)
       processedList.add(jsonNode.asText());
     }
@@ -100,19 +101,19 @@ public class DevExtremeHelper {
   public static Bson getDocument(JsonNode jsonNode) {
     Bson result = null;
     if (jsonNode.isArray() && jsonNode.size() == 3) {
-      switch(jsonNode.get(1).asText()){
+      switch (jsonNode.get(1).asText()) {
         case "notcontains":
-          String patternStr = "."+jsonNode.get(2).asText()+".";
+          String patternStr = "." + jsonNode.get(2).asText() + ".";
           Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
           result = not(regex(jsonNode.get(0).asText(), pattern));
           break;
         case "contains":
-          String patternStr2 = "."+jsonNode.get(2).asText()+".";
+          String patternStr2 = "." + jsonNode.get(2).asText() + ".";
           Pattern pattern2 = Pattern.compile(patternStr2, Pattern.CASE_INSENSITIVE);
           result = regex(jsonNode.get(0).asText(), pattern2);
           break;
         case "startswith":
-          String patternStr3 = "^"+jsonNode.get(2).asText();
+          String patternStr3 = "^" + jsonNode.get(2).asText();
           Pattern pattern3 = Pattern.compile(patternStr3, Pattern.CASE_INSENSITIVE);
           result = regex(jsonNode.get(0).asText(), pattern3);
           break;
@@ -158,15 +159,15 @@ public class DevExtremeHelper {
 
   public static Bson combineFilters(List<Object> filters) {
 
-    if(filters == null || filters.isEmpty()){
+    if (filters == null || filters.isEmpty()) {
       return new BsonDocument();
     }
 
     List<Object> singleLevelFilters = new ArrayList<Object>();
 
-    for (Object o: filters) {
+    for (Object o : filters) {
       if (o instanceof List) {
-        singleLevelFilters.add(DevExtremeHelper.combineFilters((List<Object>)o));
+        singleLevelFilters.add(DevExtremeHelper.combineFilters((List<Object>) o));
       } else {
         singleLevelFilters.add(o);
       }
@@ -176,13 +177,13 @@ public class DevExtremeHelper {
 
     // @TODO: We may receive an String as the first
     //        element in this array? validate that case!
-    Bson combinedFilters = (Bson)singleLevelFilters.get(0);
+    Bson combinedFilters = (Bson) singleLevelFilters.get(0);
 
-    for (int x=1; x<singleLevelFilters.size(); x+=2) {
-      String connector = (String)singleLevelFilters.get(x);
-      Bson b = (Bson)singleLevelFilters.get(x+1);
+    for (int x = 1; x < singleLevelFilters.size(); x += 2) {
+      String connector = (String) singleLevelFilters.get(x);
+      Bson b = (Bson) singleLevelFilters.get(x + 1);
 
-      combinedFilters = (connector.toLowerCase().equals("and"))? and(combinedFilters, b) : or(combinedFilters, b);
+      combinedFilters = (connector.toLowerCase().equals("and")) ? and(combinedFilters, b) : or(combinedFilters, b);
     }
 
     return combinedFilters;

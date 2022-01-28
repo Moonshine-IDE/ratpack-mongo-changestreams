@@ -4,16 +4,16 @@ import com.mongodb.reactivestreams.client.MongoCollection;
 import org.bson.Document;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
-import service.DevExtremeService;
+import service.RxDevExtremeService;
 
 public class RouterHandler implements Handler {
 
   private Handler mongoRestByIdHandler;
   private Handler mongoRestHandler;
   MongoCollection<Document> collection;
-  DevExtremeService devExtremeService;
+  RxDevExtremeService devExtremeService;
 
-  public RouterHandler(MongoCollection collection, DevExtremeService devExtremeService) {
+  public RouterHandler(MongoCollection collection, RxDevExtremeService devExtremeService) {
     this.mongoRestByIdHandler = new MongoRestByIdHandler(collection, devExtremeService);
     this.mongoRestHandler = new MongoRestHandler(collection, devExtremeService);
     this.collection = collection;

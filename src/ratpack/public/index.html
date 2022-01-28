@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.3/css/dx.light.css">
 </head>
 <body>
-<h1>Data source</h1>
-<p>The data is being streamed back to the browser using Server-Sent Events.</p>
+<h1>Ratpack, MongoDB Change Streams and SSE</h1>
+<p>Basic demo that uses Ratpack, MongoDB Change streams and Server-sent events in the back-end. This page uses a DevExtreme DataGrid component to demonstrate how to use the back-end endpoints.</p>
 <br />
 
 <div class="dx-viewport demo-container">
@@ -172,7 +172,7 @@ $(function() {
     $('#grid-container').dxDataGrid({
       dataSource: {
         store: gradesStore,
-        reshapeOnPush: true
+        reshapeOnPush: true   // this is required to recalculate the summary averages each time we receive a push update, executes an additional request to reload the current data page.
       },
       repaintChangesOnly: true,
       highlightChanges: true,
@@ -196,6 +196,7 @@ $(function() {
         allowAdding: true,
         allowDeleting: true,
         allowUpdating: true
+        //repaintChangesOnly: true
       },
       filterRow: {
         visible: true
@@ -227,17 +228,18 @@ $(function() {
         { dataField: 'homeworkScore', dataType: 'number' }
       ],
       summary: {
-        totalItems: [{
+        totalItems: [
+        {
           summaryType: 'count',
           column: 'hexaId',
         }, {
           summaryType: 'avg',
           displayFormat: '{0}',
-          column: 'quizScore',
-        }, {
-          summaryType: 'avg',
-          displayFormat: '{0}',
           column: 'examScore',
+        },{
+           summaryType: 'avg',
+          displayFormat: '{0}',
+          column: 'quizScore',
         }, {
           summaryType: 'avg',
           displayFormat: '{0}',
@@ -245,10 +247,7 @@ $(function() {
         }],
       }
     });
-
-    initializeStream();
 });
-// });
 
 function isNotEmpty(value) {
     return value !== undefined && value !== null && value !== "";

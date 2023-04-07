@@ -16,7 +16,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provider "virtualbox" do |vb|
      vb.name = "mongo_vm"
-     vb.memory = "1024"     
+     vb.memory = "2048"
      vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
    end
 

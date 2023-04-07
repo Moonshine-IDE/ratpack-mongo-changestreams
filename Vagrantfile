@@ -9,11 +9,26 @@ HTTP_SERVER_PORT=8080
 Vagrant.configure(2) do |config|
 
   config.vm.box = "ubuntu/bionic64"
+  config.vm.boot_timeout = 45
 
   config.vm.provider "virtualbox" do |vb|
      vb.name = "mongo_vm"
-     vb.memory = "1024"
+     vb.memory = "1024"     
+     vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
    end
+
+  # This prevents vagrant checking kernel and guest-additions for subsequent
+  # vagrant up command executions, reducing the vm startup time
+  if not isProvisioned() then
+    if Vagrant.has_plugin?("vagrant-vbguest") then
+      config.vbguest.installer_options = { allow_kernel_upgrade: true }
+      config.vbguest.auto_update = true
+    else
+      raise 'vagrant-vbguest is not installed! Please install vagrant-vbguest plugin!'
+    end
+  else
+    config.vbguest.auto_update = false
+  end
 
   config.vm.network "forwarded_port", guest: 8080, host: HTTP_SERVER_PORT, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 27017, host: MONGODB_PORT, host_ip: "127.0.0.1"
@@ -24,4 +39,8 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", inline: "echo Back-end server configuration complete!"
 
+end
+
+def isProvisioned(vm_name='default', provider='virtualbox')
+  File.exists?(File.join(File.dirname(__FILE__),".vagrant/machines/#{vm_name}/#{provider}/action_provision"))
 end

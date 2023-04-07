@@ -5,11 +5,13 @@
 # This must be greater than port 1024.
 MONGODB_PORT=27017
 HTTP_SERVER_PORT=8080
+MONGO_VERSION="5.0"              # 4.4
+MONGO_COMPONENT_VERSION="5.0.15" # 4.4.19
 
 Vagrant.configure(2) do |config|
 
   config.vm.box = "ubuntu/bionic64"
-  config.vm.boot_timeout = 45
+  config.vm.boot_timeout = 120
 
   config.vm.provider "virtualbox" do |vb|
      vb.name = "mongo_vm"
@@ -33,7 +35,8 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 8080, host: HTTP_SERVER_PORT, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 27017, host: MONGODB_PORT, host_ip: "127.0.0.1"
 
-  config.vm.provision "shell", path: "vagrant/provision.sh", privileged: false
+  config.vm.provision "shell", path: "vagrant/provision.sh", privileged: false, 
+    args: [MONGO_VERSION, MONGO_COMPONENT_VERSION]
 
   config.vm.provision "shell", path: "vagrant/initReplica.sh", privileged: false
 

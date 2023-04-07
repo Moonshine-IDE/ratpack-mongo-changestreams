@@ -3,6 +3,8 @@
 VAGRANT_DIR=/vagrant/vagrant
 HOME_DIR=~/
 HOME_BIN_DIR=$HOME_DIR/bin
+MONGO_VERSION=$1
+MONGO_COMPONENT_VERSION=$2
 
 installPackage()
 {
@@ -73,12 +75,15 @@ createBashrcAndBashProfile()
 
 installMongo()
 {
-    echo "Installing mongodb"
+    VERSION=$1
+    COMPONENT_VERSION=$2
+    echo "Installing mongodb ${COMPONENT_VERSION}"
     sudo apt-get install gnupg
-    wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list >/dev/null 2>&1
+    wget -qO - "https://www.mongodb.org/static/pgp/server-${VERSION}.asc" | sudo apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/${VERSION} multiverse" | sudo tee "/etc/apt/sources.list.d/mongodb-org-${VERSION}.list"
     sudo apt-get update
-    sudo apt-get install -y mongodb-org
+    mongo_packages=("mongodb-org=${COMPONENT_VERSION}" "mongodb-org-server=${COMPONENT_VERSION}" "mongodb-org-shell=${COMPONENT_VERSION}" "mongodb-org-mongos=${COMPONENT_VERSION}" "mongodb-org-tools=${COMPONENT_VERSION}"  mongodb-mongosh)
+    sudo apt-get install -y "${mongo_packages[@]}"
 
     echo "mongodb-org hold" | sudo dpkg --set-selections
     echo "mongodb-org-server hold" | sudo dpkg --set-selections
@@ -94,7 +99,7 @@ provision() {
     installEnvManagers
     installOpenjdk "8"
     createBashrcAndBashProfile
-    installMongo
+    installMongo "$MONGO_VERSION" "$MONGO_COMPONENT_VERSION"
 }
 
 if [ ! -f "/var/vagrant_provision" ]; then

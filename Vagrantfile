@@ -5,6 +5,7 @@
 # This must be greater than port 1024.
 MONGODB_PORT=27017
 HTTP_SERVER_PORT=8080
+SSH_PORT=2224
 MONGO_VERSION="5.0"              # 4.4
 MONGO_COMPONENT_VERSION="5.0.15" # 4.4.19
 
@@ -34,6 +35,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.network "forwarded_port", guest: 8080, host: HTTP_SERVER_PORT, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 27017, host: MONGODB_PORT, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 22, host: SSH_PORT, id: "ssh"
 
   config.vm.provision "shell", path: "vagrant/provision.sh", privileged: false, 
     args: [MONGO_VERSION, MONGO_COMPONENT_VERSION]
